@@ -1,0 +1,33 @@
+.appBtn {
+}
+
+.appBtn > * > * > * {
+  font-size: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  color: rgba(255, 255, 255, 0.854) !important;
+}
+
+.appBtn > * > button {
+  font-size: 10px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  background-color: #026cb3 !important;
+}
+
+.appBtn > * > * > button {
+  color: rgba(255, 255, 255, 0.854) !important;
+}
+
+.appBtn > * > * > * {
+  padding: 0 !important;
+}
+
+.appBtn > * > * > * > * {
+  font-size: 12px !important;
+  /* width: 60px; */
+}
+
+.appBtn > * > * > * span {
+  font-size: 12px !important;
+}
