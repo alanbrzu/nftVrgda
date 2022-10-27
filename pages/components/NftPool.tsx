@@ -50,7 +50,7 @@ function NftPool({ info, balance }: any) {
       numSold: 0,
       startTime: time,
       targetPrice: vrgda.targetPrice,
-      decayPercent: vrgda.decayPercent,
+      decayPercent: parseFloat(vrgda.decayPercent),
       numPerHour: _numPerHour,
       starting_supply: vrgda.numPerHour,
       time_days: poolTime || 1,
@@ -66,19 +66,13 @@ function NftPool({ info, balance }: any) {
   };
   // Waits 1 sec then runs function
   const vrgdaLoop = () => {
-    intervLad();
     const timer = setInterval(() => {
+      console.log(conVrgda);
       const price = getVRGDAPrice(conVrgda, Date.now());
       setPrice(price);
     }, 1000);
-  };
 
-  const intervLad = () => {
-    const interv = setTimeout(() => {
-      console.log("waiting");
-      console.log(conVrgda);
-    }, 1000);
-    return () => clearTimeout(interv);
+    return () => clearInterval(timer);
   };
 
   // Set poolInfo
@@ -103,8 +97,11 @@ function NftPool({ info, balance }: any) {
 
   // Executes vrgdaLoop when startTime is set by executeVrgda
   useEffect(() => {
-    if (conVrgda.startTime && vrgda.numSold == 0) {
+    if (conVrgda.startTime && conVrgda.numSold == 0) {
       vrgdaLoop();
+      console.log("num sold", conVrgda.numSold);
+    } else {
+      console.log("meow");
     }
   }, [conVrgda.startTime]);
 
@@ -148,12 +145,12 @@ function NftPool({ info, balance }: any) {
                   </Grid>
                   <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
                     <h4>Pool</h4>
-                    {poolInfo.numSold > 0 ? (
+                    {poolInfo.purchased > 0 ? (
                       <>
                         <p>Starting Supply: {poolInfo.starting_supply}</p>
                         <p>Available: {poolInfo.available}</p>
                         <p>Time: {poolInfo.time_left * 24} hours left</p>
-                        <p>Ask: $ {poolInfo.price.toFixed(2)}</p>
+                        <p>Ask: $ {poolInfo.price.toFixed(2)} meow</p>
                       </>
                     ) : (
                       <>
@@ -264,7 +261,7 @@ function NftPool({ info, balance }: any) {
                     if (parseFloat(e.target.value) >= 0 || !e.target.value) {
                       setVrgda({
                         ...vrgda,
-                        decayPercent: parseFloat(e.target.value),
+                        decayPercent: e.target.value,
                       });
                     }
                   }}
