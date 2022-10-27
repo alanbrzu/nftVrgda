@@ -33,6 +33,27 @@ export interface Info {
   owner_balance: number;
 }
 
+export const sideStyle = {
+  display: "flex",
+  position: "absolute",
+  height: "fit-content",
+  width: "300px",
+  right: 0,
+  top: "200px",
+};
+
+export const appContStyle = {
+  width: "fit-content",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "start",
+  marginLeft: 0,
+  marginRight: 0,
+  marginTop: "60px",
+  gap: "4em",
+  padding: 0,
+};
+
 function NFTPools({ web3Enabled, signer, chainId, balance, account }: any) {
   const [contractAddress, setContractAddress] = useState<any>();
   const [info, setInfo] = useState<Info>();
@@ -134,24 +155,6 @@ function NFTPools({ web3Enabled, signer, chainId, balance, account }: any) {
     });
   };
 
-  const handleNewNotification = () => {
-    dispatch({
-      type: "info",
-      message: "Transaction Complete!",
-      title: "Transaction Notification",
-      position: "topR",
-    });
-  };
-
-  const handleSuccess = async (tx: any) => {
-    try {
-      await tx.wait(1);
-      handleNewNotification();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     console.log(batchInfo);
   }, [batchInfo]);
@@ -175,20 +178,7 @@ function NFTPools({ web3Enabled, signer, chainId, balance, account }: any) {
 
         {web3Enabled && account && contractAddress && signer ? (
           <>
-            <Container
-              style={{ padding: "0", marginRight: 0 }}
-              sx={{
-                width: "fit-content",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "start",
-                gridTemplateRows: "1fr 1fr",
-                marginLeft: 0,
-                marginTop: "60px",
-                gap: "4em",
-                paddingLeft: "0",
-              }}
-            >
+            <Container sx={appContStyle}>
               <form onSubmit={(e) => e.preventDefault()} style={formStyle}>
                 <p style={headStyle}>Mint</p>
                 <input
@@ -288,17 +278,7 @@ function NFTPools({ web3Enabled, signer, chainId, balance, account }: any) {
                 </form>
               </Grid>
             </Container>
-            <Container
-              fixed
-              sx={{
-                display: "flex",
-                position: "absolute",
-                height: "fit-content",
-                width: "300px",
-                right: 0,
-                top: "200px",
-              }}
-            >
+            <Container fixed sx={sideStyle}>
               <NftInfo
                 signer={signer}
                 account={account}

@@ -4,10 +4,10 @@ import { abi, contractAddresses } from "../../constants/index";
 import { Container, Stack } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
-const _containerStyle = {
+export const _containerStyle = {
   display: "flex",
   flexDirection: "column",
-  gap: "6px",
+  gap: "8px",
   padding: "1em",
 };
 
@@ -55,24 +55,25 @@ function NftInfo({ signer, account, contractAddress, info, setInfo }: any) {
               onClick={() => readFunctions()}
             />
             <Container sx={_containerStyle}>
-              <p>Collection Name</p>
-              <p>{info.name}</p>
+              <p>Collection</p>
+              <p style={{ fontSize: "14px" }}>{info.name}</p>
             </Container>
             <Container sx={_containerStyle}>
               <p>Mint Price</p>
-              <p>{info.price} ETH</p>
+              <p style={{ fontSize: "14px" }}>{info.price} ETH</p>
             </Container>
             <Container sx={_containerStyle}>
               <p>Total Supply</p>
-              <p>10,000</p>
+              <p style={{ fontSize: "14px" }}>10,000</p>
             </Container>
             <Container sx={_containerStyle}>
               <p>Total Minted</p>
-              <p>{info.total_minted}</p>
+
+              <p style={{ fontSize: "14px" }}>{info.total_minted}</p>
             </Container>
             <Container sx={_containerStyle}>
               <p>Wallet Balance</p>
-              <p>{info.owner_balance}</p>
+              <p style={{ fontSize: "14px" }}>{info.owner_balance}</p>
             </Container>
           </Stack>
         </>
