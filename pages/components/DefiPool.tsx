@@ -74,7 +74,9 @@ function DefiPool({ info, balance }: any) {
 
         setPrice(price);
       }, 1000);
-      return () => clearInterval(timer);
+      if (prevAssignmentValue.current.numSold !== vrgda.numSold) {
+        return () => clearInterval(timer);
+      }
     } else {
       console.log(vrgda);
     }
@@ -106,8 +108,17 @@ function DefiPool({ info, balance }: any) {
 
   useEffect(() => {
     // console.log(vrgda);
-    vrgdaLoop();
-  }, [vrgda]);
+    // vrgdaLoop();
+    if (vrgda.numSold != undefined) {
+      const timer = setInterval(() => {
+        console.log(vrgda);
+        const price = getVRGDAPrice(vrgda, Date.now());
+
+        setPrice(price);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [vrgda.numSold]);
 
   return (
     <Container
