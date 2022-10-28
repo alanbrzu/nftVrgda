@@ -69,6 +69,9 @@ function NftPool({ info, balance }: any) {
     });
   };
 
+  // Step 1, transfer NFTs to contract when creating pool
+  // Step 2, transfer when someone purchases from pool
+
   // Sets VRGDA
   useEffect(() => {
     findVrgda();

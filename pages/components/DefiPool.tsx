@@ -9,14 +9,7 @@ import {
 } from "../../utils/styling/styles";
 import { useTime } from "../../utils/time/useTime";
 import { getVRGDAPrice } from "../../utils/vrgda/vrgda";
-import { VRGDA } from "./NftPool";
-
-interface PoolCreate {
-  price: number;
-  starting_supply: number;
-  time_left: number;
-  purchased: number;
-}
+import { VRGDA, PoolCreate } from "./NftPool";
 
 function DefiPool({ info, balance }: any) {
   const time = useTime();
