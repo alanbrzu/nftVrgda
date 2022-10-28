@@ -39,7 +39,7 @@ function NftPool({ info, balance }: any) {
   const [conVrgda, setConVrgda] = useState<ConVRGDA>({});
   const [poolInfo, setPoolInfo] = useState<Pool>({});
   const [poolTime, setPoolTime] = useState<number>();
-  const [purchaseAmt, setPurchaseAmt] = useState<number>({});
+  const [purchaseAmt, setPurchaseAmt] = useState<number>();
   const [price, setPrice] = useState<any>();
 
   // Click button executes this function
@@ -172,7 +172,6 @@ function NftPool({ info, balance }: any) {
               )}
 
               {/* Buy from pool */}
-
               <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
                 <>
                   {conVrgda && price ? (
@@ -197,9 +196,6 @@ function NftPool({ info, balance }: any) {
                           }}
                           placeholder="Purchase from pool"
                         />
-                        <p style={{ marginTop: "14px", fontSize: "14px" }}>
-                          Total Price:
-                        </p>
                         <Button
                           sx={buttonStyle}
                           variant="contained"
@@ -296,11 +292,5 @@ function NftPool({ info, balance }: any) {
     </>
   );
 }
-
-//   numSold: number;
-//   startTime: number;
-//   targetPrice: number;
-//   decayPercent: number;
-//   numPerHour: number;
 
 export default NftPool;

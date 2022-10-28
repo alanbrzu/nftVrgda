@@ -12,6 +12,7 @@ import {
 import { ethers } from "ethers";
 import DefiInfo from "../components/DefiInfo";
 import { sideStyle, appContStyle } from "./nft-pools";
+import DefiPool from "../components/DefiPool";
 
 export interface DefiInfo {
   name: string;
@@ -97,6 +98,7 @@ function Defi({ web3Enabled, signer, chainId, balance, account }: any) {
                 setInfo={setInfo}
               />
             </Container>
+            <DefiPool info={info} balance={balance} />
           </>
         ) : (
           <p>Connect Wallet</p>
