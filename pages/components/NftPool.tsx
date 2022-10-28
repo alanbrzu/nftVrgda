@@ -18,278 +18,190 @@ export interface VRGDA {
   numPerHour: number;
 }
 
-interface ConVRGDA extends VRGDA {
-  starting_supply: number;
-  time_days: number;
-}
-
-export interface Pool {
+export interface PoolCreate {
   price: number;
   starting_supply: number;
-  purchased: number;
-  available: number;
   time_left: number;
+  purchased: number;
 }
 
 function NftPool({ info, balance }: any) {
   const time = useTime();
 
-  // Within the inputs I set all but startTime and numSold
-  const [vrgda, setVrgda] = useState<VRGDA>({});
-  const [conVrgda, setConVrgda] = useState<ConVRGDA>({});
+  const [poolCreate, setPoolCreate] = useState<PoolCreate>({});
   const [poolInfo, setPoolInfo] = useState<Pool>({});
   const [poolTime, setPoolTime] = useState<number>();
-  const [purchaseAmt, setPurchaseAmt] = useState<number>();
+  const [vrgda, setVrgda] = useState<VRGDA>({});
   const [price, setPrice] = useState<any>();
+  const [purchaseAmt, setPurchaseAmt] = useState<number>();
 
-  // Click button executes this function
-  // Which then triggers the useEffect, calling vrgdaLoop
-  const executeVrgda = () => {
-    const _numPerHour = vrgda.numPerHour / (poolTime * 24);
-    setConVrgda({
-      numSold: 0,
-      startTime: time,
-      targetPrice: vrgda.targetPrice,
-      decayPercent: parseFloat(vrgda.decayPercent),
-      numPerHour: _numPerHour,
-      starting_supply: vrgda.numPerHour,
-      time_days: poolTime || 1,
-    });
-    setVrgda({
-      numSold: "",
-      startTime: "",
-      targetPrice: "",
-      decayPercent: "",
-      numPerHour: "",
-    });
-    setPoolTime("");
-  };
-  // Waits 1 sec then runs function
-  const vrgdaLoop = () => {
-    const timer = setInterval(() => {
-      console.log(conVrgda);
-      const price = getVRGDAPrice(conVrgda, Date.now());
-      setPrice(price);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  };
-
-  // Set poolInfo
-  const updatePool = () => {
-    setPoolInfo({
-      price: price,
-      starting_supply: conVrgda.starting_supply,
-      purchased: conVrgda.numSold,
-      available: conVrgda.starting_supply - conVrgda.numSold,
-      time_left: conVrgda.time_days,
-    });
-  };
-
-  // Buy from pool
-  const makePurchase = () => {
-    setConVrgda({
-      ...conVrgda,
-      numSold: conVrgda.numSold + purchaseAmt,
-    });
-    setPurchaseAmt("");
-  };
-
-  // Executes vrgdaLoop when startTime is set by executeVrgda
-  useEffect(() => {
-    if (conVrgda.startTime && conVrgda.numSold == 0) {
-      vrgdaLoop();
-      console.log("num sold", conVrgda.numSold);
+  const createPool = () => {
+    if (poolCreate.starting_supply > info.wallet_balance) {
+      console.log("Not enough NFTs");
     } else {
-      console.log("meow");
+      setPoolInfo({
+        ...poolCreate,
+        price: parseFloat(poolCreate.price),
+        purchased: 0,
+      });
+      console.log(poolInfo);
     }
-  }, [conVrgda.startTime]);
+  };
 
-  // Updates pool whenever numSold changes
-  useEffect(() => {
-    if (conVrgda.startTime && conVrgda.numSold > 0) {
-      vrgdaLoop();
-      updatePool();
-    }
-  }, [price]);
+  // Sets VRGDA values once
+  const findVrgda = () => {
+    const _numPerHour = poolCreate.starting_supply / (poolTime * 24);
+    console.log(poolInfo.purchased);
+    setVrgda({
+      numSold: poolInfo.purchased,
+      startTime: time,
+      targetPrice: parseFloat(poolCreate.price),
+      decayPercent: 0.8,
+      numPerHour: _numPerHour,
+    });
+  };
 
+  // Triggers new price
+  const makePurchase = () => {
+    setVrgda({
+      ...vrgda,
+      numSold: vrgda.numSold + purchaseAmt,
+    });
+  };
+
+  // Sets VRGDA
   useEffect(() => {
-    console.log(poolInfo);
+    findVrgda();
   }, [poolInfo]);
 
+  useEffect(() => {
+    if (vrgda.numSold != undefined) {
+      const timer = setInterval(() => {
+        const price = getVRGDAPrice(vrgda, Date.now());
+        setPrice(price);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [vrgda.numSold]);
+
+  useEffect(() => {
+    console.log(vrgda);
+  }, [vrgda]);
+
+  useEffect(() => {
+    console.log(price);
+  }, [price]);
+
   return (
-    <>
-      {info ? (
-        <Container
-          sx={containerStyle}
-          style={{ padding: "1em 0", marginTop: "80px", marginBottom: "100px" }}
+    <Container
+      sx={containerStyle}
+      style={{ padding: "1em 0", marginTop: "80px", marginBottom: "100px" }}
+    >
+      <h3>Swap Pool</h3>
+      <Container sx={{ display: "flex", flexDirection: "column", gap: "2em" }}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ marginTop: "10px", marginBottom: "80px" }}
         >
-          <h3>Swap Pool</h3>
-          <p>{info.name}</p>
-          <Container
-            sx={{ display: "flex", flexDirection: "column", gap: "2em" }}
-          >
-            <Grid
-              container
-              spacing={2}
-              sx={{ marginTop: "10px", marginBottom: "80px" }}
-            >
-              {/* Pool info */}
-              {conVrgda && price ? (
-                <>
-                  <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
-                    <h4>ETH</h4>
-                    <p>Wallet Balance: {info.owner_balance}</p>
-                    <p>ETH Balance: {balance} ETH</p>
-                    <p>Total Price</p>
-                  </Grid>
-                  <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
-                    <h4>Pool</h4>
-                    {poolInfo.purchased > 0 ? (
-                      <>
-                        <p>Starting Supply: {poolInfo.starting_supply}</p>
-                        <p>Available: {poolInfo.available}</p>
-                        <p>Time: {poolInfo.time_left * 24} hours left</p>
-                        <p>Ask: $ {poolInfo.price.toFixed(2)} meow</p>
-                      </>
-                    ) : (
-                      <>
-                        <p>Starting Supply: {conVrgda.starting_supply}</p>
-                        <p>
-                          Available:{" "}
-                          {conVrgda.starting_supply - conVrgda.numSold}
-                        </p>
-                        <p>Time: {conVrgda.time_days * 24} hours left</p>
-                        <p>Ask: $ {price.toFixed(2)}</p>
-                      </>
-                    )}
-                  </Grid>
-                </>
-              ) : (
-                <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
-                  <p>No Pools</p>
-                </Grid>
-              )}
+          {/* Pool info */}
+          {poolInfo.purchased != undefined && price ? (
+            <>
+              <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
+                <h4>ETH</h4>
+                <p>Wallet Balance: {info.owner_balance}</p>
+                <p>ETH Balance: {balance} ETH</p>
+                <p>Total Price</p>
+              </Grid>
+              <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
+                <h4>Pool</h4>{" "}
+                <p>
+                  Starting Supply: {poolInfo.starting_supply.toLocaleString()}
+                </p>
+                <p>Available: {poolInfo.starting_supply - vrgda.numSold}</p>
+                <p>Time Left: {poolTime * 24} hours</p>
+                <p>Ask: $ {price.toFixed(6)}</p>
+              </Grid>
 
               {/* Buy from pool */}
               <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
-                <>
-                  {conVrgda && price ? (
-                    <>
-                      <form
-                        onSubmit={(e) => e.preventDefault()}
-                        style={formStyle}
-                      >
-                        <p style={headStyle}>Make Purchase</p>
-                        <input
-                          style={inputStyle}
-                          type="number"
-                          value={purchaseAmt}
-                          required
-                          onChange={(e) => {
-                            if (
-                              parseInt(e.target.value) >= 0 ||
-                              !e.target.value
-                            ) {
-                              setPurchaseAmt(parseInt(e.target.value));
-                            }
-                          }}
-                          placeholder="Purchase from pool"
-                        />
-                        <Button
-                          sx={buttonStyle}
-                          variant="contained"
-                          onClick={() => makePurchase()}
-                        >
-                          Purchase
-                        </Button>
-                      </form>
-                    </>
-                  ) : (
-                    <>
-                      <p>No Pools</p>
-                    </>
+                <form onSubmit={(e) => e.preventDefault()} style={formStyle}>
+                  <p style={headStyle}>Make Purchase</p>
+                  <input
+                    style={inputStyle}
+                    type="number"
+                    value={purchaseAmt}
+                    required
+                    onChange={(e) => setPurchaseAmt(parseInt(e.target.value))}
+                    placeholder="Purchase from pool"
+                  />
+                  {purchaseAmt > 0 && (
+                    <p style={{ marginTop: "10px", fontSize: "12px" }}>
+                      Total: {(purchaseAmt * price).toFixed(4)} ETH
+                    </p>
                   )}
-                </>
+                  <Button
+                    sx={buttonStyle}
+                    variant="contained"
+                    onClick={makePurchase}
+                  >
+                    Purchase
+                  </Button>
+                </form>
               </Grid>
+            </>
+          ) : (
+            <Grid>
+              <p>No Pools</p>
             </Grid>
+          )}
+        </Grid>
 
-            {/* Create Pool */}
-            <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
-              <form onSubmit={(e) => e.preventDefault()} style={formStyle}>
-                <p style={headStyle}>Create Pool</p>
-                <input
-                  style={inputStyle}
-                  type="number"
-                  value={vrgda.numPerHour}
-                  required
-                  onChange={(e) => {
-                    if (parseInt(e.target.value) >= 0 || !e.target.value) {
-                      setVrgda({
-                        ...vrgda,
-                        numPerHour: parseInt(e.target.value),
-                      });
-                    }
-                  }}
-                  placeholder="Set pool supply"
-                />
-                <input
-                  style={inputStyle}
-                  type="number"
-                  value={vrgda.targetPrice}
-                  required
-                  onChange={(e) => {
-                    if (parseFloat(e.target.value) >= 0 || !e.target.value) {
-                      setVrgda({
-                        ...vrgda,
-                        targetPrice: parseFloat(e.target.value),
-                      });
-                    }
-                  }}
-                  placeholder="Target price"
-                />
-                <input
-                  style={inputStyle}
-                  type="text"
-                  value={vrgda.decayPercent}
-                  required
-                  onChange={(e) => {
-                    if (parseFloat(e.target.value) >= 0 || !e.target.value) {
-                      setVrgda({
-                        ...vrgda,
-                        decayPercent: e.target.value,
-                      });
-                    }
-                  }}
-                  placeholder="Decay percent"
-                />
-                <input
-                  style={inputStyle}
-                  type="number"
-                  value={poolTime}
-                  required
-                  onChange={(e) => {
-                    if (parseInt(e.target.value) >= 0 || !e.target.value) {
-                      setPoolTime(parseInt(e.target.value));
-                    }
-                  }}
-                  placeholder="Time (Days)"
-                />
-                <Button
-                  sx={buttonStyle}
-                  variant="contained"
-                  onClick={() => executeVrgda()}
-                >
-                  Send
-                </Button>
-              </form>
-            </Grid>
-          </Container>
-        </Container>
-      ) : (
-        <p>Loading</p>
-      )}
-    </>
+        {/* Create Pool */}
+        <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
+          <form onSubmit={(e) => e.preventDefault()} style={formStyle}>
+            <p style={headStyle}>Create Pool</p>
+            <input
+              style={inputStyle}
+              type="number"
+              value={poolCreate.starting_supply}
+              required
+              onChange={(e) => {
+                setPoolCreate({
+                  ...poolCreate,
+                  starting_supply: parseInt(e.target.value),
+                });
+              }}
+              placeholder="Set pool supply"
+            />
+            <input
+              style={inputStyle}
+              type="number"
+              value={poolCreate.price}
+              required
+              onChange={(e) => {
+                setPoolCreate({
+                  ...poolCreate,
+                  price: e.target.value,
+                });
+              }}
+              placeholder="Target price"
+            />
+            <input
+              style={inputStyle}
+              type="number"
+              value={poolTime}
+              required
+              onChange={(e) => setPoolTime(parseInt(e.target.value))}
+              placeholder="Time (Days)"
+            />
+            <Button sx={buttonStyle} variant="contained" onClick={createPool}>
+              Send
+            </Button>
+          </form>
+        </Grid>
+      </Container>
+    </Container>
   );
 }
 

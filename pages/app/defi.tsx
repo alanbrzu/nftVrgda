@@ -26,10 +26,6 @@ function Defi({ web3Enabled, signer, chainId, balance, account }: any) {
   const [info, setInfo] = useState<DefiInfo>();
   const [mintAmt, setMintAmt] = useState<number>();
 
-  // Write functions
-  // Mint
-  // Transfer
-
   // Mint mint(address, amount)
   const mint = async () => {
     const contract = new ethers.Contract(contractAddress, defiAbi, signer);
@@ -43,7 +39,6 @@ function Defi({ web3Enabled, signer, chainId, balance, account }: any) {
   };
 
   // Transfer transfer(address, amount)
-
   useEffect(() => {
     console.log(contractAddress);
   }, [contractAddress]);

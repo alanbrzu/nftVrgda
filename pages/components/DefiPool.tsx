@@ -18,41 +18,33 @@ interface PoolCreate {
   purchased: number;
 }
 
-interface PoolInfo extends PoolCreate {
-  available: number;
-}
-
 function DefiPool({ info, balance }: any) {
   const time = useTime();
 
   const [poolCreate, setPoolCreate] = useState<PoolCreate>({});
-  const [poolInfo, setPoolInfo] = useState<PoolInfo>({});
+  const [poolInfo, setPoolInfo] = useState<PoolCreate>({});
   const [poolTime, setPoolTime] = useState<number>();
   const [vrgda, setVrgda] = useState<VRGDA>({});
   const [price, setPrice] = useState<any>();
   const [purchaseAmt, setPurchaseAmt] = useState<number>();
 
-  const prevAssignmentValue = useRef(vrgda);
-
+  // Create pool
+  // Setting pool info triggers useEffect
   const createPool = () => {
     if (poolCreate.starting_supply > info.wallet_balance) {
       console.log("Not enough coins");
     } else {
-      const _available = poolCreate.starting_supply - 0;
       setPoolInfo({
         ...poolCreate,
         price: parseFloat(poolCreate.price),
         purchased: 0,
-        available: _available,
       });
       console.log(poolInfo);
     }
   };
 
-  // getVRGDAPrice(vrgda, time) needs
-  // numSold, startTime, targetPrice, decayPercent, numPerHour
-
-  // Add loop
+  // Sets VRGDA values once
+  // Called with useEffect
   const findVrgda = () => {
     const _numPerHour = poolCreate.starting_supply / (poolTime * 24);
     console.log(poolInfo.purchased);
@@ -60,28 +52,12 @@ function DefiPool({ info, balance }: any) {
       numSold: poolInfo.purchased,
       startTime: time,
       targetPrice: parseFloat(poolCreate.price),
-      decayPercent: 1,
+      decayPercent: 0.8,
       numPerHour: _numPerHour,
     });
-    // vrgdaLoop();
   };
 
-  const vrgdaLoop = () => {
-    if (vrgda.numSold != undefined) {
-      const timer = setInterval(() => {
-        console.log(vrgda);
-        const price = getVRGDAPrice(vrgda, Date.now());
-
-        setPrice(price);
-      }, 1000);
-      if (prevAssignmentValue.current.numSold !== vrgda.numSold) {
-        return () => clearInterval(timer);
-      }
-    } else {
-      console.log(vrgda);
-    }
-  };
-
+  // Triggers new price
   const makePurchase = () => {
     setVrgda({
       ...vrgda,
@@ -89,36 +65,26 @@ function DefiPool({ info, balance }: any) {
     });
   };
 
-  //   useEffect(() => {
-  //     if (
-  //       prevAssignmentValue.current.startTime !== vrgda.startTime &&
-  //       prevAssignmentValue.current.numSold !== vrgda.numSold
-  //     ) {
-  //       vrgdaLoop();
-  //     }
-  //   }, [createPool]);
-
+  // Sets VRGDA values
   useEffect(() => {
     findVrgda();
   }, [poolInfo]);
 
+  // Replaces VrgdaLoop
   useEffect(() => {
-    console.log(price);
-  }, [price]);
-
-  useEffect(() => {
-    // console.log(vrgda);
-    // vrgdaLoop();
     if (vrgda.numSold != undefined) {
       const timer = setInterval(() => {
-        console.log(vrgda);
+        // console.log(vrgda);
         const price = getVRGDAPrice(vrgda, Date.now());
-
         setPrice(price);
       }, 1000);
       return () => clearInterval(timer);
     }
   }, [vrgda.numSold]);
+
+  useEffect(() => {
+    console.log(poolTime);
+  }, [poolTime]);
 
   return (
     <Container
@@ -132,6 +98,7 @@ function DefiPool({ info, balance }: any) {
           spacing={2}
           sx={{ marginTop: "10px", marginBottom: "80px" }}
         >
+          {/* Pool Info */}
           {poolInfo.purchased != undefined && price ? (
             <>
               <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
@@ -141,10 +108,18 @@ function DefiPool({ info, balance }: any) {
               </Grid>
               <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
                 <h4>Pool</h4>
-                <p>Starting Supply: {poolInfo.starting_supply}</p>
-                <p>Available: {poolInfo.starting_supply - vrgda.numSold}</p>
+                <p>
+                  Starting Supply: {poolInfo.starting_supply.toLocaleString()}
+                </p>
+                <p>
+                  Available:{" "}
+                  {(poolInfo.starting_supply - vrgda.numSold).toLocaleString()}
+                </p>
+                <p>Time Left: {poolTime * 24} hours</p>
                 <p>Price: {price.toFixed(6)} ETH/BTX</p>
               </Grid>
+
+              {/* Buy from Pool */}
               <Grid item xs={6} md={4} sx={{ display: "grid", gap: "1em" }}>
                 <form onSubmit={(e) => e.preventDefault()} style={formStyle}>
                   <p style={headStyle}>Purchase from Pool</p>
@@ -156,7 +131,11 @@ function DefiPool({ info, balance }: any) {
                     required
                     onChange={(e) => setPurchaseAmt(parseInt(e.target.value))}
                   />
-
+                  {purchaseAmt > 0 && (
+                    <p style={{ marginTop: "10px", fontSize: "12px" }}>
+                      Total: {(purchaseAmt * price).toFixed(4)} ETH
+                    </p>
+                  )}
                   <Button
                     sx={buttonStyle}
                     variant="contained"

@@ -19,7 +19,7 @@ export function vrgdaPrice(
     return (
       targetPrice *
       Math.pow(
-        1.5 - priceDecayPercent,
+        1.4 - priceDecayPercent,
         msToHours(msSinceStart) - (numSold + 1) / numPerHour
       )
     );
